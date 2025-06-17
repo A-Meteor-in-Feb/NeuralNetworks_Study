@@ -94,3 +94,47 @@ testing_data = dataset[x_test, y_test]
 
 
 #data loader
+'''
+    Dataloader is an object that we can loop through it to train according to batches.
+    When we start training, we loop through epochs, if you skip the vatch size it means that 
+    the amount of training data in one batch is equal to the complete amount of training data,
+    this method is not efficient and in most of the cases you need to train through using batches.
+
+    When you create a dataloader, you define the batch size and enable the shuffle to randomize the data
+    and then you can loop through it each epoch to train normally.
+'''
+train_dataloader = DataLoader(training_data, batch_size=8, shuffle=True)
+validation_dataloader = DataLoader(validation_data, batch_size=8, shuffle=True)
+testing_dataloader = DataLoader(testing_data, batch_size=8, shuffle=True)
+
+# build the model
+HIDDEN_NEURONS = 10
+class MyModel(nn.Module):
+    #constructor
+    def __init__(self):
+        super(MyModel, self).__init__() #we use the same constructor in nn.Module
+        #create layer
+        '''
+            a linear layer which represents the input and having the input size of 10 
+            which is the number of columns of the input and the output of the number of hidden neurons, 
+            next layer is the output layer which have the input of hidden neurons and 
+            one output since we have a binary classification. 
+            Finally we have the activation function which is the sigmoid.
+        '''
+        self.input_layer = nn.Linear(X.shape[1], HIDDEN_NEURONS)
+        self.linear = nn.Linear(HIDDEN_NEURONS, 1)
+        self.sigmoid = nn.Sigmoid()
+
+    # Define how the data flows inside the model
+    def forward(self, x):
+        # first, the input data x goes into the input layer
+        x = self.input_layer(x)
+        # then, the output of the input layer will go to the linear layer
+        x = self.linear(x)
+
+        x = self.sigmoid(x)
+        return x
+    
+# tips: everything you create in the PyTorch needs to be moved into 'device'
+model = MyModel().to(device)
+
