@@ -74,7 +74,7 @@ print(x_val.shape)   #(2728, 10)
 # we need to modify to macth our dataset and to be suitable to our dataset.
 class dataset(Dataset):
     # constructor
-    def __init__(self, X, Y):
+    def __init__(self, X, Y, device):
         # The input velue (maybe pandas, numpy arry or normal list) is converted into torch.tensors
         # move the converted data to the device (GPU).
         self.X = torch.tensor(X, dtype=torch.float32).to(device)
@@ -88,9 +88,9 @@ class dataset(Dataset):
     def __getitem__(self, index):
         return self.X[index], self.Y[index]
     
-training_data = dataset[x_train, y_train]
-validation_data = dataset[x_val, y_val]
-testing_data = dataset[x_test, y_test]
+training_data = dataset(x_train, y_train, device)
+validation_data = dataset(x_val, y_val, device)
+testing_data = dataset(x_test, y_test, device)
 
 
 #data loader
@@ -138,3 +138,20 @@ class MyModel(nn.Module):
 # tips: everything you create in the PyTorch needs to be moved into 'device'
 model = MyModel().to(device)
 
+'''
+    1. Takes your model (model)
+    2. Simulates a forward pass using a dummy input of shape (batch_size=1, X.shape[1])
+       Here X.shape[1] is the size of the feature dimension of your data (i.e. number of input features).
+    3. Prints out a layer-by-layer table showing:
+       Each layer's name/type
+       The output shape at that layer
+       The number of parameters (weights & biases) in that layer
+'''
+# attention: you have to run model on CPU rather than GPU to call summary function
+# because summary will use dummy data which locates on CPU.
+summary(model.cpu(), (X.shape[1],))
+model = MyModel().to(device)
+
+#loss function (it's named criterion in most references)
+criterion = nn.BCELoss() # BCELoss is the Binary Cross-Entropy for binary classification
+optimizer = Adam(model.parameters(), lr=1e-3)
